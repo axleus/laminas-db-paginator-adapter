@@ -9,11 +9,6 @@ use PhpDb\Sql\Having;
 use PhpDb\Sql\Where;
 use PhpDb\TableGateway\AbstractTableGateway;
 
-/**
- * @template-covariant TKey of int
- * @template-covariant TValue
- * @extends Select<TKey, TValue>
- */
 class TableGateway extends Select
 {
     /**

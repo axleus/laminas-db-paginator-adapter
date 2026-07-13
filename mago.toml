@@ -1,6 +1,4 @@
 #:schema https://mago.carthage.software/1.43.0/schema.json
-# Welcome to Mago!
-# For full documentation, see https://mago.carthage.software/1.43.0/en/tools/overview/
 version = "1"
 php-version = "8.2.0"
 
@@ -33,10 +31,16 @@ find-unused-expressions = true
 analyze-dead-code = false
 memoize-properties = true
 check-throws = true
-unchecked-exceptions = ["Error", "LogicException"]
+unchecked-exceptions = [
+    "Error",
+    "LogicException",
+    "PHPUnit\\Framework\\Exception",
+    "PHPUnit\\Framework\\MockObject\\Exception",
+    "PHPUnit\\Event\\NoPreviousThrowableException",
+]
 unchecked-exception-classes = []
 check-missing-override = true
-find-unused-parameters = true
+find-unused-parameters = false
 strict-list-index-checks = true
 strict-array-index-existence = false
 allow-array-truthy-operand = false

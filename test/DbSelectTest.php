@@ -10,9 +10,9 @@ use PhpDb\Adapter\Driver\ResultInterface;
 use PhpDb\Adapter\Driver\StatementInterface;
 use PhpDb\Adapter\Platform\PlatformInterface;
 use PhpDb\Paginator\Adapter\Exception\MissingRowCountColumnException;
+use PhpDb\Paginator\Adapter\Exception\UnexpectedValueException;
 use PhpDb\Paginator\Adapter\Select;
 use PhpDb\Sql;
-use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -21,27 +21,18 @@ use function strtolower;
 
 final class DbSelectTest extends TestCase
 {
-    /** @var MockObject|Sql\Select */
-    protected $mockSelect;
+    protected Sql\Select&MockObject $mockSelect;
 
-    /** @var MockObject|Sql\Select */
-    protected $mockSelectCount;
+    protected Sql\Select&MockObject $mockSelectCount;
 
-    /** @var MockObject|StatementInterface */
-    protected $mockStatement;
+    protected StatementInterface&MockObject $mockStatement;
 
-    /** @var MockObject|ResultInterface */
-    protected $mockResult;
+    protected ResultInterface&MockObject $mockResult;
 
-    /** @var MockObject|Sql\Sql */
-    protected $mockSql;
+    protected Sql\Sql&MockObject $mockSql;
 
-    /** @var Select */
-    protected $dbSelect;
+    protected Select $dbSelect;
 
-    /**
-     * @throws Exception
-     */
     public function setUp(): void
     {
         $this->mockResult    = $this->createMock(ResultInterface::class);
@@ -75,6 +66,9 @@ final class DbSelectTest extends TestCase
         $this->dbSelect        = new Select($this->mockSelect, $this->mockSql);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testGetItems(): void
     {
         $this->mockSelect
@@ -93,6 +87,9 @@ final class DbSelectTest extends TestCase
         $this->assertEquals([], $items);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testCount(): void
     {
         $this->mockResult
@@ -106,6 +103,9 @@ final class DbSelectTest extends TestCase
         $this->assertEquals(5, $count);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testCountQueryWithLowerColumnNameShouldReturnValidResult(): void
     {
         $this->dbSelect = new Select($this->mockSelect, $this->mockSql);
@@ -118,6 +118,9 @@ final class DbSelectTest extends TestCase
         $this->assertEquals(7, $count);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testCountQueryWithMissingColumnNameShouldRaiseException(): void
     {
         $this->dbSelect = new Select($this->mockSelect, $this->mockSql);
@@ -130,6 +133,9 @@ final class DbSelectTest extends TestCase
         $this->dbSelect->count();
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testCustomCount(): void
     {
         $this->dbSelect = new Select($this->mockSelect, $this->mockSql, null, $this->mockSelectCount);
@@ -145,6 +151,7 @@ final class DbSelectTest extends TestCase
     /**
      * @group 6817
      * @group 6812
+     * @throws UnexpectedValueException
      */
     public function testReturnValueIsArray(): void
     {

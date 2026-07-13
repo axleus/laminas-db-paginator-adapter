@@ -9,6 +9,7 @@ use PhpDb\Adapter\Driver\DriverInterface;
 use PhpDb\Adapter\Driver\ResultInterface;
 use PhpDb\Adapter\Driver\StatementInterface;
 use PhpDb\Adapter\Platform\Sql92;
+use PhpDb\Paginator\Adapter\Exception\UnexpectedValueException;
 use PhpDb\Paginator\Adapter\Select;
 use PhpDb\Paginator\Adapter\TableGateway;
 use PhpDb\TableGateway\TableGateway as BaseTableGateway;
@@ -17,16 +18,13 @@ use PHPUnit\Framework\TestCase;
 
 final class DbTableGatewayTest extends TestCase
 {
-    /** @var MockObject|StatementInterface */
-    protected $mockStatement;
+    protected StatementInterface&MockObject $mockStatement;
 
-    /** @var TableGateway */
-    protected $dbTableGateway;
+    protected TableGateway $dbTableGateway;
 
-    /** @var MockObject|BaseTableGateway */
-    protected $mockTableGateway;
+    protected BaseTableGateway $tableGateway;
 
-    public function setup(): void
+    public function setUp(): void
     {
         $mockStatement = $this->createMock(StatementInterface::class);
         $mockDriver    = $this->createMock(DriverInterface::class);
@@ -39,24 +37,18 @@ final class DbTableGatewayTest extends TestCase
             ->method('formatParameterName')
             ->willReturnArgument(0);
 
-        $mockAdapter = $this->getMockForAbstractClass(
-            Adapter::class,
-            [$mockDriver, new Sql92()]
-        );
+        $adapter = new Adapter($mockDriver, new Sql92());
 
-        $tableName        = 'foobar';
-        $mockTableGateway = $this->getMockForAbstractClass(
-            BaseTableGateway::class,
-            [$tableName, $mockAdapter]
-        );
-
-        $this->mockStatement    = $mockStatement;
-        $this->mockTableGateway = $mockTableGateway;
+        $this->mockStatement = $mockStatement;
+        $this->tableGateway  = new BaseTableGateway('foobar', $adapter);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testGetItems(): void
     {
-        $this->dbTableGateway = new TableGateway($this->mockTableGateway);
+        $this->dbTableGateway = new TableGateway($this->tableGateway);
 
         $mockResult = $this->createMock(ResultInterface::class);
         $this->mockStatement
@@ -68,9 +60,12 @@ final class DbTableGatewayTest extends TestCase
         $this->assertEquals([], $items);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testCount(): void
     {
-        $this->dbTableGateway = new TableGateway($this->mockTableGateway);
+        $this->dbTableGateway = new TableGateway($this->tableGateway);
 
         $mockResult = $this->createMock(ResultInterface::class);
         $mockResult
@@ -87,11 +82,14 @@ final class DbTableGatewayTest extends TestCase
         $this->assertEquals(10, $count);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testGetItemsWithWhereAndOrder(): void
     {
         $where                = "foo = bar";
         $order                = "foo";
-        $this->dbTableGateway = new TableGateway($this->mockTableGateway, $where, $order);
+        $this->dbTableGateway = new TableGateway($this->tableGateway, $where, $order);
 
         $mockResult = $this->createMock(ResultInterface::class);
         $this->mockStatement
@@ -103,12 +101,15 @@ final class DbTableGatewayTest extends TestCase
         $this->assertEquals([], $items);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testGetItemsWithWhereAndOrderAndGroup(): void
     {
         $where                = "foo = bar";
         $order                = "foo";
         $group                = "foo";
-        $this->dbTableGateway = new TableGateway($this->mockTableGateway, $where, $order, $group);
+        $this->dbTableGateway = new TableGateway($this->tableGateway, $where, $order, $group);
 
         $mockResult = $this->createMock(ResultInterface::class);
         $this->mockStatement
@@ -129,13 +130,16 @@ final class DbTableGatewayTest extends TestCase
         $this->assertEquals([], $items);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public function testGetItemsWithWhereAndOrderAndGroupAndHaving(): void
     {
         $where                = "foo = bar";
         $order                = "foo";
         $group                = "foo";
         $having               = "count(foo)>0";
-        $this->dbTableGateway = new TableGateway($this->mockTableGateway, $where, $order, $group, $having);
+        $this->dbTableGateway = new TableGateway($this->tableGateway, $where, $order, $group, $having);
 
         $mockResult = $this->createMock(ResultInterface::class);
         $this->mockStatement

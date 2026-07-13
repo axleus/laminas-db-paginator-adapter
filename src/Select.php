@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace PhpDb\Paginator\Adapter;
 
 use Laminas\Paginator\Adapter\AdapterInterface;
-use Laminas\Paginator\Exception;
 use PhpDb\Adapter\AdapterInterface as DbAdapterInterface;
 use PhpDb\Paginator\Adapter\Exception\MissingRowCountColumnException;
+use PhpDb\Paginator\Adapter\Exception\UnexpectedValueException;
 use PhpDb\ResultSet\ResultSet;
 use PhpDb\ResultSet\ResultSetInterface;
 use PhpDb\Sql;
@@ -18,9 +18,7 @@ use function iterator_to_array;
 use function strtolower;
 
 /**
- * @template-covariant TKey of int
- * @template-covariant TValue
- * @implements AdapterInterface<TKey, TValue>
+ * @implements AdapterInterface<array-key, mixed>
  */
 class Select implements AdapterInterface
 {
@@ -49,7 +47,6 @@ class Select implements AdapterInterface
      *
      * @param Sql\Select                 $select             The select query
      * @param DbAdapterInterface|Sql\Sql $adapterOrSqlObject DB adapter or Sql\Sql object
-     * @throws Exception\InvalidArgumentException
      */
     public function __construct(
         Sql\Select $select,
@@ -64,12 +61,6 @@ class Select implements AdapterInterface
             $adapterOrSqlObject = new Sql\Sql($adapterOrSqlObject);
         }
 
-        if (! $adapterOrSqlObject instanceof Sql\Sql) {
-            throw new Exception\InvalidArgumentException(
-                '$adapterOrSqlObject must be an instance of PhpDb\Adapter\AdapterInterface or PhpDb\Sql\Sql'
-            );
-        }
-
         $this->sql                = $adapterOrSqlObject;
         $this->resultSetPrototype = $resultSetPrototype ?: new ResultSet();
     }
@@ -79,8 +70,9 @@ class Select implements AdapterInterface
      * Executes the {$itemsCallback}.
      *
      * @inheritDoc
+     * @throws UnexpectedValueException
      */
-    public function getItems($offset, $itemCountPerPage): array
+    public function getItems(int $offset, int $itemCountPerPage): array
     {
         $select = clone $this->select;
         $select
@@ -90,6 +82,10 @@ class Select implements AdapterInterface
         $statement = $this->sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
+        if ($result === null) {
+            throw new UnexpectedValueException('Statement execution did not produce a result set');
+        }
+
         $resultSet = clone $this->resultSetPrototype;
         $resultSet->initialize($result);
 
@@ -98,13 +94,21 @@ class Select implements AdapterInterface
 
     /**
      * Returns the total number of rows in the result set.
+     *
+     * @throws UnexpectedValueException
      */
     public function count(): int
     {
         $select    = $this->getSelectCount();
         $statement = $this->sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
-        $row       = $result->current();
+
+        if ($result === null) {
+            throw new UnexpectedValueException('Statement execution did not produce a result set');
+        }
+
+        /** @var array<string, mixed>|false|null $row */
+        $row = $result->current();
         if (! is_array($row)) {
             throw MissingRowCountColumnException::forColumn(self::ROW_COUNT_COLUMN_NAME);
         }

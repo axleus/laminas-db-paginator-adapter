@@ -55,9 +55,9 @@
         ],
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
-        "test": "phpunit --colors=always --testsuite \"unit test\"",
+        "test": "phpunit --colors=always --testsuite phpdb-paginator-adapter-unit-test",
         "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
-        "test-integration": "phpunit --colors=always --testsuite \"integration test\"",
+        "test-integration": "phpunit --colors=always --testsuite phpdb-paginator-adapter-integration-test",
         "static-analysis": "mago analyze",
         "upload-coverage": "coveralls -v"
     }

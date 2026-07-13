@@ -7,7 +7,7 @@
     cacheDirectory=".phpunit.cache">
 
     <testsuites>
-        <testsuite name="phpdb-{component}">
+        <testsuite name="phpdb-paginator-adapter-unit-test">
             <directory>./test</directory>
         </testsuite>
     </testsuites>
