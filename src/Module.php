@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Laminas\Db\Paginator\Adapter;
+namespace PhpDb\Paginator\Adapter;
 
 class Module
 {
     /**
-     * Return default laminas-db-paginator-adapter configuration.
+     * Return default phpdb-paginator-adapter configuration.
      *
      * @return array[]
      */

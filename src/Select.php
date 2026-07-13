@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Laminas\Db\Paginator\Adapter;
+namespace PhpDb\Paginator\Adapter;
 
-use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Adapter\AdapterInterface as DBAdapterInterface;
-use Laminas\Db\ResultSet\ResultSet;
-use Laminas\Db\ResultSet\ResultSetInterface;
-use Laminas\Db\Sql;
 use Laminas\Paginator\Adapter\AdapterInterface;
-use Laminas\Paginator\Adapter\Exception\MissingRowCountColumnException;
 use Laminas\Paginator\Exception;
+use PhpDb\Adapter\AdapterInterface as DbAdapterInterface;
+use PhpDb\Paginator\Adapter\Exception\MissingRowCountColumnException;
+use PhpDb\ResultSet\ResultSet;
+use PhpDb\ResultSet\ResultSetInterface;
+use PhpDb\Sql;
 
 use function array_key_exists;
 use function is_array;
@@ -48,26 +47,26 @@ class Select implements AdapterInterface
     /**
      * Constructs instance.
      *
-     * @param Sql\Select $select The select query
-     * @param DBAdapterInterface|Sql\Sql $adapterOrSqlObject DB adapter or Sql\Sql object
+     * @param Sql\Select                 $select             The select query
+     * @param DbAdapterInterface|Sql\Sql $adapterOrSqlObject DB adapter or Sql\Sql object
      * @throws Exception\InvalidArgumentException
      */
     public function __construct(
         Sql\Select $select,
-        Sql\Sql|DBAdapterInterface $adapterOrSqlObject,
+        Sql\Sql|DbAdapterInterface $adapterOrSqlObject,
         ?ResultSetInterface $resultSetPrototype = null,
         ?Sql\Select $countSelect = null
     ) {
         $this->select      = $select;
         $this->countSelect = $countSelect;
 
-        if ($adapterOrSqlObject instanceof Adapter) {
+        if ($adapterOrSqlObject instanceof DbAdapterInterface) {
             $adapterOrSqlObject = new Sql\Sql($adapterOrSqlObject);
         }
 
         if (! $adapterOrSqlObject instanceof Sql\Sql) {
             throw new Exception\InvalidArgumentException(
-                '$adapterOrSqlObject must be an instance of Laminas\Db\Adapter\Adapter or Laminas\Db\Sql\Sql'
+                '$adapterOrSqlObject must be an instance of PhpDb\Adapter\AdapterInterface or PhpDb\Sql\Sql'
             );
         }
 
@@ -77,7 +76,6 @@ class Select implements AdapterInterface
 
     /**
      * Returns an array of items for a page.
-     *
      * Executes the {$itemsCallback}.
      *
      * @inheritDoc
@@ -157,7 +155,7 @@ class Select implements AdapterInterface
     /**
      * @internal
      *
-     * @see https://github.com/laminas/laminas-paginator/issues/3 Reference for creating an internal cache ID
+     * @see  https://github.com/laminas/laminas-paginator/issues/3 Reference for creating an internal cache ID
      *
      * @todo The next major version should rework the entire caching of a paginator.
      */

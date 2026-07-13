@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Laminas\Db\Paginator\Adapter;
+namespace PhpDb\Paginator\Adapter;
 
 use Closure;
-use Laminas\Db\Sql\Having;
-use Laminas\Db\Sql\Where;
-use Laminas\Db\TableGateway\AbstractTableGateway;
+use PhpDb\Sql\Having;
+use PhpDb\Sql\Where;
+use PhpDb\TableGateway\AbstractTableGateway;
 
 /**
  * @template-covariant TKey of int

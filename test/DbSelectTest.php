@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace LaminasTest\Db\Paginator\Adapter;
+namespace PhpDbTest\Paginator\Adapter;
 
-use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Adapter\Driver\DriverInterface;
-use Laminas\Db\Adapter\Driver\ResultInterface;
-use Laminas\Db\Adapter\Driver\StatementInterface;
-use Laminas\Db\Adapter\Platform\PlatformInterface;
-use Laminas\Db\Paginator\Adapter\Select;
-use Laminas\Db\Sql;
-use Laminas\Paginator\Adapter\Exception\MissingRowCountColumnException;
+use PhpDb\Adapter\Adapter;
+use PhpDb\Adapter\Driver\DriverInterface;
+use PhpDb\Adapter\Driver\ResultInterface;
+use PhpDb\Adapter\Driver\StatementInterface;
+use PhpDb\Adapter\Platform\PlatformInterface;
+use PhpDb\Paginator\Adapter\Exception\MissingRowCountColumnException;
+use PhpDb\Paginator\Adapter\Select;
+use PhpDb\Sql;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -42,7 +42,6 @@ final class DbSelectTest extends TestCase
     /**
      * @throws Exception
      */
-    #![Override]
     public function setUp(): void
     {
         $this->mockResult    = $this->createMock(ResultInterface::class);
@@ -57,13 +56,13 @@ final class DbSelectTest extends TestCase
         $mockPlatform->expects($this->any())->method('getName')->willReturn('platform');
 
         $this->mockSql = $this->getMockBuilder(Sql\Sql::class)
-            ->setConstructorArgs(
-                [
-                    $this->getMockBuilder(Adapter::class)
-                         ->setConstructorArgs([$mockDriver, $mockPlatform])
-                         ->getMock(),
-                ]
-            )->getMock();
+                              ->setConstructorArgs(
+                                  [
+                                      $this->getMockBuilder(Adapter::class)
+                                           ->setConstructorArgs([$mockDriver, $mockPlatform])
+                                           ->getMock(),
+                                  ]
+                              )->getMock();
 
         $this->mockSql
             ->expects($this->any())

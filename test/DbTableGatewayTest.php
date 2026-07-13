@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace LaminasTest\Db\Paginator\Adapter;
+namespace PhpDbTest\Paginator\Adapter;
 
-use Laminas\Db\Adapter\Adapter;
-use Laminas\Db\Adapter\Driver\DriverInterface;
-use Laminas\Db\Adapter\Driver\ResultInterface;
-use Laminas\Db\Adapter\Driver\StatementInterface;
-use Laminas\Db\Adapter\Platform\Sql92;
-use Laminas\Db\Paginator\Adapter\Select;
-use Laminas\Db\Paginator\Adapter\TableGateway;
-use Laminas\Db\TableGateway\TableGateway as BaseTableGateway;
+use PhpDb\Adapter\Adapter;
+use PhpDb\Adapter\Driver\DriverInterface;
+use PhpDb\Adapter\Driver\ResultInterface;
+use PhpDb\Adapter\Driver\StatementInterface;
+use PhpDb\Adapter\Platform\Sql92;
+use PhpDb\Paginator\Adapter\Select;
+use PhpDb\Paginator\Adapter\TableGateway;
+use PhpDb\TableGateway\TableGateway as BaseTableGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -26,7 +26,6 @@ final class DbTableGatewayTest extends TestCase
     /** @var MockObject|BaseTableGateway */
     protected $mockTableGateway;
 
-    #![Override]
     public function setup(): void
     {
         $mockStatement = $this->createMock(StatementInterface::class);
@@ -117,14 +116,14 @@ final class DbTableGatewayTest extends TestCase
             ->method('setSql')
             ->with(
                 $this->equalTo(
-                    // phpcs:ignore
-                    'SELECT "foobar".* FROM "foobar" WHERE foo = bar GROUP BY "foo" ORDER BY "foo" ASC LIMIT limit OFFSET offset'
+                    'SELECT "foobar".* FROM "foobar"'
+                          . ' WHERE foo = bar GROUP BY "foo" ORDER BY "foo" ASC LIMIT limit OFFSET offset'
                 )
             );
         $this->mockStatement
             ->expects($this->any())
             ->method('execute')
-            ->willReturn($mockResult); // MixedMethodCall emitted here
+            ->willReturn($mockResult);
 
         $items = $this->dbTableGateway->getItems(2, 10);
         $this->assertEquals([], $items);
@@ -144,13 +143,13 @@ final class DbTableGatewayTest extends TestCase
             ->method('setSql')
             ->with(
                 $this->equalTo(
-                    // phpcs:ignore
-                    'SELECT "foobar".* FROM "foobar" WHERE foo = bar GROUP BY "foo" HAVING count(foo)>0 ORDER BY "foo" ASC LIMIT limit OFFSET offset'
+                    'SELECT "foobar".* FROM "foobar" WHERE foo = bar GROUP BY "foo" HAVING count(foo)>0 '
+                    . 'ORDER BY "foo" ASC LIMIT limit OFFSET offset'
                 )
             );
         $this->mockStatement
             ->expects($this->any())
-            ->method('execute') // MixedMethodCall emitted here
+            ->method('execute')
             ->willReturn($mockResult);
 
         $items = $this->dbTableGateway->getItems(2, 10);
