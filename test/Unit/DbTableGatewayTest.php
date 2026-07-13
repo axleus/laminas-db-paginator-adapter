@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace PhpDbTest\Paginator\Adapter;
+namespace PhpDbTest\Paginator\Adapter\Unit;
 
 use PhpDb\Adapter\Adapter;
 use PhpDb\Adapter\Driver\DriverInterface;
@@ -13,9 +13,11 @@ use PhpDb\Paginator\Adapter\Exception\UnexpectedValueException;
 use PhpDb\Paginator\Adapter\Select;
 use PhpDb\Paginator\Adapter\TableGateway;
 use PhpDb\TableGateway\TableGateway as BaseTableGateway;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+#[Group('unit')]
 final class DbTableGatewayTest extends TestCase
 {
     protected StatementInterface&MockObject $mockStatement;

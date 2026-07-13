@@ -8,7 +8,10 @@
 
     <testsuites>
         <testsuite name="phpdb-paginator-adapter-unit-test">
-            <directory>./test</directory>
+            <directory>./test/Unit</directory>
+        </testsuite>
+        <testsuite name="phpdb-paginator-adapter-integration-test">
+            <directory>./test/Integration</directory>
         </testsuite>
     </testsuites>
 
