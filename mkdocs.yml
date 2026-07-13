@@ -4,16 +4,16 @@ nav:
     - Home: index.md
     - v1:
       - Introduction: v1/intro.md
-      - "DbSelect Adapter": v1/db-select.md
-      - "DbTableGateway Adapter": v1/db-table-gateway.md
-site_name: 'laminas-paginator-adapter-laminasdb (Abandoned)'
-site_description: 'laminas-db adapters for laminas-paginator'
-repo_url: 'https://github.com/laminas/laminas-paginator-adapter-laminasdb'
+      - "Select Adapter": v1/db-select.md
+      - "TableGateway Adapter": v1/db-table-gateway.md
+site_name: 'phpdb-paginator-adapter'
+site_description: 'phpdb adapters for laminas-paginator'
+repo_url: 'https://github.com/php-db/phpdb-paginator-adapter'
 extra:
     project: Components
     installation:
-        config_provider_class: 'Laminas\Db\Paginator\Adapter\ConfigProvider'
-        module_class: 'Laminas\Db\Paginator\Adapter\Module'
+        config_provider_class: 'PhpDb\Paginator\Adapter\ConfigProvider'
+        module_class: 'PhpDb\Paginator\Adapter\Module'
     current_version: v1
     versions:
       - v1

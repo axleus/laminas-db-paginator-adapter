@@ -38,6 +38,12 @@
     "suggest": {
         "phpdb/phpdb-servicemanager": "Laminas\\ServiceManager component"
     },
+    "extra": {
+        "laminas": {
+            "component": "PhpDb\\Paginator\\Adapter",
+            "config-provider": "PhpDb\\Paginator\\Adapter\\ConfigProvider"
+        }
+    },
     "autoload": {
         "psr-4": {
             "PhpDb\\Paginator\\Adapter\\": "src/"
