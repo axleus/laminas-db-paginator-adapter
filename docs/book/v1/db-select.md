@@ -131,6 +131,31 @@ $paginator = new Paginator($adapter);
 This approach will probably not give you a huge performance gain on small collections and/or simple select queries.
 However, with complex queries and large collections, a similar approach could give you a significant performance boost.
 
+## Caching Results
+
+In laminas-paginator v2, `Laminas\Paginator\Paginator` provided its own caching layer and inspected the adapter to build a cache key.
+In v3 that mechanism was removed in favour of `Laminas\Paginator\Adapter\CachingAdapter`, a [PSR-6](https://www.php-fig.org/psr/psr-6/) decorator that wraps any adapter, so the `Select` adapter needs no caching support of its own.
+
+Each page of items is cached under a key built from your prefix plus the offset and item count.
+Because the adapter no longer contributes the SQL to the cache key, the prefix you supply must uniquely identify the query being paginated.
+
+```php
+use DateInterval;
+use Laminas\Paginator\Adapter\CachingAdapter;
+use Laminas\Paginator\Paginator;
+use PhpDb\Paginator\Adapter\Select;
+
+// $query is the Select for retrieving items
+// $dbAdapter is the phpdb adapter
+// $cache is any PSR-6 Psr\Cache\CacheItemPoolInterface implementation
+$adapter   = new Select($query, $dbAdapter);
+$paginator = new Paginator(
+    new CachingAdapter($adapter, 'blog-posts', $cache, new DateInterval('PT5M'))
+);
+```
+
+Pass `null` as the final argument to cache items without an expiry.
+
 ### Overriding the Count Method
 
 The following example demonstrates extending the `Select` adapter to override the `count()` method.

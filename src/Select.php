@@ -92,25 +92,6 @@ class Select implements AdapterInterface
     }
 
     /**
-     * @internal
-     *
-     * @see  https://github.com/laminas/laminas-paginator/issues/3 Reference for creating an internal cache ID
-     *
-     * @todo The next major version should rework the entire caching of a paginator.
-     *
-     * @return array{select: string, count_select: string}
-     */
-    public function getArrayCopy(): array
-    {
-        return [
-            'select'       => $this->sql->buildSqlString($this->select),
-            'count_select' => $this->sql->buildSqlString(
-                $this->getSelectCount(),
-            ),
-        ];
-    }
-
-    /**
      * Returns an array of items for a page.
      * Executes the {$itemsCallback}.
      *

@@ -18,7 +18,6 @@ use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-use function array_keys;
 use function strtolower;
 
 #[Group('unit')]
@@ -131,24 +130,6 @@ final class DbSelectTest extends TestCase
 
         $count = $this->dbSelect->count();
         static::assertSame(7, $count);
-    }
-
-    #[Test]
-    public function getArrayCopyShouldContainSelectItems(): void
-    {
-        $this->dbSelect = new Select(
-            $this->mockSelect,
-            $this->mockSql,
-            null,
-            $this->mockSelectCount,
-        );
-        static::assertSame(
-            [
-                'select',
-                'count_select',
-            ],
-            array_keys($this->dbSelect->getArrayCopy()),
-        );
     }
 
     /**
