@@ -6,6 +6,7 @@ namespace PhpDb\Paginator\Adapter\Exception;
 
 use Throwable;
 
-interface ExceptionInterface extends Throwable
-{
-}
+/**
+ * @api
+ */
+interface ExceptionInterface extends Throwable {}

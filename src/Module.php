@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PhpDb\Paginator\Adapter;
 
-class Module
+final class Module
 {
     /**
      * Return default phpdb-paginator-adapter configuration.

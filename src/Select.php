@@ -35,6 +35,7 @@ class Select implements AdapterInterface
     protected ?Sql\Select $countSelect;
 
     protected ResultSetInterface $resultSetPrototype;
+
     public const ROW_COUNT_COLUMN_NAME = 'C';
 
     /**
@@ -52,7 +53,7 @@ class Select implements AdapterInterface
         Sql\Select $select,
         Sql\Sql|DbAdapterInterface $adapterOrSqlObject,
         ?ResultSetInterface $resultSetPrototype = null,
-        ?Sql\Select $countSelect = null
+        ?Sql\Select $countSelect = null,
     ) {
         $this->select      = $select;
         $this->countSelect = $countSelect;
@@ -62,34 +63,7 @@ class Select implements AdapterInterface
         }
 
         $this->sql                = $adapterOrSqlObject;
-        $this->resultSetPrototype = $resultSetPrototype ?: new ResultSet();
-    }
-
-    /**
-     * Returns an array of items for a page.
-     * Executes the {$itemsCallback}.
-     *
-     * @inheritDoc
-     * @throws UnexpectedValueException
-     */
-    public function getItems(int $offset, int $itemCountPerPage): array
-    {
-        $select = clone $this->select;
-        $select
-            ->offset($offset)
-            ->limit($itemCountPerPage);
-
-        $statement = $this->sql->prepareStatementForSqlObject($select);
-        $result    = $statement->execute();
-
-        if ($result === null) {
-            throw new UnexpectedValueException('Statement execution did not produce a result set');
-        }
-
-        $resultSet = clone $this->resultSetPrototype;
-        $resultSet->initialize($result);
-
-        return iterator_to_array($resultSet);
+        $this->resultSetPrototype = $resultSetPrototype ?? new ResultSet();
     }
 
     /**
@@ -103,7 +77,7 @@ class Select implements AdapterInterface
         $statement = $this->sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
 
-        if ($result === null) {
+        if (null === $result) {
             throw new UnexpectedValueException('Statement execution did not produce a result set');
         }
 
@@ -118,11 +92,56 @@ class Select implements AdapterInterface
     }
 
     /**
+     * @internal
+     *
+     * @see  https://github.com/laminas/laminas-paginator/issues/3 Reference for creating an internal cache ID
+     *
+     * @todo The next major version should rework the entire caching of a paginator.
+     *
+     * @return array{select: string, count_select: string}
+     */
+    public function getArrayCopy(): array
+    {
+        return [
+            'select'       => $this->sql->buildSqlString($this->select),
+            'count_select' => $this->sql->buildSqlString(
+                $this->getSelectCount(),
+            ),
+        ];
+    }
+
+    /**
+     * Returns an array of items for a page.
+     * Executes the {$itemsCallback}.
+     *
+     * @inheritDoc
+     * @throws UnexpectedValueException
+     */
+    public function getItems(int $offset, int $itemCountPerPage): array
+    {
+        $select = clone $this->select;
+        $select->offset($offset)
+            ->limit($itemCountPerPage);
+
+        $statement = $this->sql->prepareStatementForSqlObject($select);
+        $result    = $statement->execute();
+
+        if (null === $result) {
+            throw new UnexpectedValueException('Statement execution did not produce a result set');
+        }
+
+        $resultSet = clone $this->resultSetPrototype;
+        $resultSet->initialize($result);
+
+        return iterator_to_array($resultSet);
+    }
+
+    /**
      * Returns select query for count
      */
     protected function getSelectCount(): Sql\Select
     {
-        if ($this->countSelect !== null) {
+        if (null !== $this->countSelect) {
             return $this->countSelect;
         }
 
@@ -140,6 +159,7 @@ class Select implements AdapterInterface
     }
 
     /**
+     * @param array<string, mixed> $row
      * @throws MissingRowCountColumnException
      */
     private function locateRowCount(array $row): int
@@ -154,22 +174,5 @@ class Select implements AdapterInterface
         }
 
         throw MissingRowCountColumnException::forColumn(self::ROW_COUNT_COLUMN_NAME);
-    }
-
-    /**
-     * @internal
-     *
-     * @see  https://github.com/laminas/laminas-paginator/issues/3 Reference for creating an internal cache ID
-     *
-     * @todo The next major version should rework the entire caching of a paginator.
-     */
-    public function getArrayCopy(): array
-    {
-        return [
-            'select'       => $this->sql->buildSqlString($this->select),
-            'count_select' => $this->sql->buildSqlString(
-                $this->getSelectCount()
-            ),
-        ];
     }
 }

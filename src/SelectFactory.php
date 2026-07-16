@@ -10,7 +10,7 @@ use PhpDb\ResultSet\ResultSetInterface;
 use PhpDb\Sql;
 use Psr\Container\ContainerInterface;
 
-class SelectFactory
+final class SelectFactory
 {
     /**
      * @param class-string $requestedName
@@ -22,10 +22,12 @@ class SelectFactory
      *     3?: Sql\Select|null,
      * }|null $options
      * @throws InvalidArgumentException
+     *
+     * @mago-expect analysis:unused-parameter
      */
     public function __invoke(ContainerInterface $container, string $requestedName, ?array $options = null): Select
     {
-        if ($options === null) {
+        if (null === $options) {
             throw new InvalidArgumentException('Missing options');
         }
 

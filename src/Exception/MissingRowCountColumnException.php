@@ -12,13 +12,12 @@ final class MissingRowCountColumnException extends LogicException implements Exc
 {
     /**
      * @param string $columnName Name of row count column.
-     * @return self
      */
-    public static function forColumn($columnName): static
+    public static function forColumn(string $columnName): static
     {
         return new self(sprintf(
             'Unable to determine row count; missing row count column ("%s") in result',
-            $columnName
+            $columnName,
         ));
     }
 }

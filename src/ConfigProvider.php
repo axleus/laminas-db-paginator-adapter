@@ -4,20 +4,8 @@ declare(strict_types=1);
 
 namespace PhpDb\Paginator\Adapter;
 
-class ConfigProvider
+final class ConfigProvider
 {
-    /**
-     * Return default phpdb-paginator-adapter configuration.
-     *
-     * @return array[]
-     */
-    public function __invoke(): array
-    {
-        return [
-            'paginators' => $this->getPaginatorConfig(),
-        ];
-    }
-
     /**
      * Return default service mappings for the paginator adapter plugin manager.
      *
@@ -37,6 +25,18 @@ class ConfigProvider
                 Select::class       => SelectFactory::class,
                 TableGateway::class => TableGatewayFactory::class,
             ],
+        ];
+    }
+
+    /**
+     * Return default phpdb-paginator-adapter configuration.
+     *
+     * @return array[]
+     */
+    public function __invoke(): array
+    {
+        return [
+            'paginators' => $this->getPaginatorConfig(),
         ];
     }
 }

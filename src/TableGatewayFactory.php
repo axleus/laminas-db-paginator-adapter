@@ -11,7 +11,7 @@ use PhpDb\Sql\Where;
 use PhpDb\TableGateway\AbstractTableGateway;
 use Psr\Container\ContainerInterface;
 
-class TableGatewayFactory
+final class TableGatewayFactory
 {
     /**
      * @param class-string $requestedName
@@ -24,13 +24,15 @@ class TableGatewayFactory
      *     4?: Having|array|Closure|string|null,
      * }|null $options
      * @throws InvalidArgumentException
+     *
+     * @mago-expect analysis:unused-parameter
      */
     public function __invoke(
         ContainerInterface $container,
         string $requestedName,
-        ?array $options = null
+        ?array $options = null,
     ): TableGateway {
-        if ($options === null) {
+        if (null === $options) {
             throw new InvalidArgumentException('Missing options');
         }
 

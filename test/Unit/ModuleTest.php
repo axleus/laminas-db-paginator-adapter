@@ -10,14 +10,16 @@ use PhpDb\Paginator\Adapter\SelectFactory;
 use PhpDb\Paginator\Adapter\TableGateway;
 use PhpDb\Paginator\Adapter\TableGatewayFactory;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
 final class ModuleTest extends TestCase
 {
-    public function testGetConfigMapsAdapterAliasesAndFactories(): void
+    #[Test]
+    public function getConfigMapsAdapterAliasesAndFactories(): void
     {
-        $this->assertSame(
+        static::assertSame(
             [
                 'paginators' => [
                     'aliases'   => [
@@ -33,7 +35,7 @@ final class ModuleTest extends TestCase
                     ],
                 ],
             ],
-            (new Module())->getConfig()
+            (new Module())->getConfig(),
         );
     }
 }

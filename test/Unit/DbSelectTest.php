@@ -14,6 +14,7 @@ use PhpDb\Paginator\Adapter\Exception\UnexpectedValueException;
 use PhpDb\Paginator\Adapter\Select;
 use PhpDb\Sql;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -35,45 +36,148 @@ final class DbSelectTest extends TestCase
 
     protected Select $dbSelect;
 
-    public function setUp(): void
+    /**
+     * @throws UnexpectedValueException
+     */
+    #[Test]
+    public function countQueryWithLowerColumnNameShouldReturnValidResult(): void
     {
-        $this->mockResult    = $this->createMock(ResultInterface::class);
-        $this->mockStatement = $this->createMock(StatementInterface::class);
+        $this->dbSelect = new Select($this->mockSelect, $this->mockSql);
+        $this->mockResult
+            ->expects($this->once())
+            ->method('current')
+            ->willReturn([strtolower(Select::ROW_COUNT_COLUMN_NAME) => 7]);
 
-        $this->mockStatement->expects($this->any())->method('execute')->willReturn($this->mockResult);
-
-        $this->mockSql = $this->createMockSql($this->mockStatement);
-
-        $this->mockSelect      = $this->createMock(Sql\Select::class);
-        $this->mockSelectCount = $this->createMock(Sql\Select::class);
-        $this->dbSelect        = new Select($this->mockSelect, $this->mockSql);
+        $count = $this->dbSelect->count();
+        static::assertSame(7, $count);
     }
 
     /**
      * @throws UnexpectedValueException
      */
-    public function testGetItems(): void
+    #[Test]
+    public function countQueryWithMissingColumnNameShouldRaiseException(): void
+    {
+        $this->dbSelect = new Select($this->mockSelect, $this->mockSql);
+        $this->mockResult
+            ->expects($this->once())
+            ->method('current')
+            ->willReturn([]);
+
+        $this->expectException(MissingRowCountColumnException::class);
+        $this->dbSelect->count();
+    }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    #[Test]
+    public function countReturnsTotalRowCount(): void
+    {
+        $this->mockResult
+            ->expects($this->once())
+            ->method('current')
+            ->willReturn([Select::ROW_COUNT_COLUMN_NAME => 5]);
+
+        $this->mockSelect->expects($this->exactly(3))->method('reset'); // called for columns, limit, offset, order
+
+        $count = $this->dbSelect->count();
+        static::assertSame(5, $count);
+    }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    #[Test]
+    public function countThrowsWhenResultRowIsNotArray(): void
+    {
+        $this->mockResult
+            ->expects($this->once())
+            ->method('current')
+            ->willReturn(false);
+
+        $this->expectException(MissingRowCountColumnException::class);
+        $this->expectExceptionMessage('missing row count column');
+        $this->dbSelect->count();
+    }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    #[Test]
+    public function countThrowsWhenStatementProducesNoResult(): void
+    {
+        $statement = $this->createMock(StatementInterface::class);
+        $statement->expects($this->once())->method('execute')->willReturn(null);
+
+        $dbSelect = new Select($this->mockSelect, $this->createMockSql($statement));
+
+        $this->expectException(UnexpectedValueException::class);
+        $this->expectExceptionMessage('Statement execution did not produce a result set');
+        $dbSelect->count();
+    }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    #[Test]
+    public function customCount(): void
+    {
+        $this->dbSelect = new Select($this->mockSelect, $this->mockSql, null, $this->mockSelectCount);
+        $this->mockResult
+            ->expects($this->once())
+            ->method('current')
+            ->willReturn([Select::ROW_COUNT_COLUMN_NAME => 7]);
+
+        $count = $this->dbSelect->count();
+        static::assertSame(7, $count);
+    }
+
+    #[Test]
+    public function getArrayCopyShouldContainSelectItems(): void
+    {
+        $this->dbSelect = new Select(
+            $this->mockSelect,
+            $this->mockSql,
+            null,
+            $this->mockSelectCount,
+        );
+        static::assertSame(
+            [
+                'select',
+                'count_select',
+            ],
+            array_keys($this->dbSelect->getArrayCopy()),
+        );
+    }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    #[Test]
+    public function getItems(): void
     {
         $this->mockSelect
             ->expects($this->once())
             ->method('limit')
-            ->with($this->equalTo(10))
+            ->with(static::equalTo(10))
             ->willReturnSelf();
 
         $this->mockSelect
             ->expects($this->once())
             ->method('offset')
-            ->with($this->equalTo(2))
+            ->with(static::equalTo(2))
             ->willReturnSelf();
 
         $items = $this->dbSelect->getItems(2, 10);
-        $this->assertEquals([], $items);
+        static::assertEquals([], $items);
     }
 
     /**
      * @throws UnexpectedValueException
      */
-    public function testGetItemsThrowsWhenStatementProducesNoResult(): void
+    #[Test]
+    public function getItemsThrowsWhenStatementProducesNoResult(): void
     {
         $statement = $this->createMock(StatementInterface::class);
         $statement->expects($this->once())->method('execute')->willReturn(null);
@@ -91,131 +195,38 @@ final class DbSelectTest extends TestCase
     /**
      * @throws UnexpectedValueException
      */
-    public function testCount(): void
-    {
-        $this->mockResult
-            ->expects($this->once())
-            ->method('current')
-            ->willReturn([Select::ROW_COUNT_COLUMN_NAME => 5]);
-
-        $this->mockSelect->expects($this->exactly(3))->method('reset'); // called for columns, limit, offset, order
-
-        $count = $this->dbSelect->count();
-        $this->assertEquals(5, $count);
-    }
-
-    /**
-     * @throws UnexpectedValueException
-     */
-    public function testCountThrowsWhenStatementProducesNoResult(): void
-    {
-        $statement = $this->createMock(StatementInterface::class);
-        $statement->expects($this->once())->method('execute')->willReturn(null);
-
-        $dbSelect = new Select($this->mockSelect, $this->createMockSql($statement));
-
-        $this->expectException(UnexpectedValueException::class);
-        $this->expectExceptionMessage('Statement execution did not produce a result set');
-        $dbSelect->count();
-    }
-
-    /**
-     * @throws UnexpectedValueException
-     */
-    public function testCountThrowsWhenResultRowIsNotArray(): void
-    {
-        $this->mockResult
-            ->expects($this->once())
-            ->method('current')
-            ->willReturn(false);
-
-        $this->expectException(MissingRowCountColumnException::class);
-        $this->expectExceptionMessage('missing row count column');
-        $this->dbSelect->count();
-    }
-
-    /**
-     * @throws UnexpectedValueException
-     */
-    public function testCountQueryWithLowerColumnNameShouldReturnValidResult(): void
-    {
-        $this->dbSelect = new Select($this->mockSelect, $this->mockSql);
-        $this->mockResult
-            ->expects($this->once())
-            ->method('current')
-            ->willReturn([strtolower(Select::ROW_COUNT_COLUMN_NAME) => 7]);
-
-        $count = $this->dbSelect->count();
-        $this->assertEquals(7, $count);
-    }
-
-    /**
-     * @throws UnexpectedValueException
-     */
-    public function testCountQueryWithMissingColumnNameShouldRaiseException(): void
-    {
-        $this->dbSelect = new Select($this->mockSelect, $this->mockSql);
-        $this->mockResult
-            ->expects($this->once())
-            ->method('current')
-            ->willReturn([]);
-
-        $this->expectException(MissingRowCountColumnException::class);
-        $this->dbSelect->count();
-    }
-
-    /**
-     * @throws UnexpectedValueException
-     */
-    public function testCustomCount(): void
-    {
-        $this->dbSelect = new Select($this->mockSelect, $this->mockSql, null, $this->mockSelectCount);
-        $this->mockResult
-            ->expects($this->once())
-            ->method('current')
-            ->willReturn([Select::ROW_COUNT_COLUMN_NAME => 7]);
-
-        $count = $this->dbSelect->count();
-        $this->assertEquals(7, $count);
-    }
-
-    /**
-     * @throws UnexpectedValueException
-     */
+    #[Test]
     #[Group('6817')]
     #[Group('6812')]
-    public function testReturnValueIsArray(): void
+    public function returnValueIsArray(): void
     {
         $this->mockSelect
             ->expects($this->once())
             ->method('limit')
-            ->with($this->equalTo(10))
+            ->with(static::equalTo(10))
             ->willReturnSelf();
 
         $this->mockSelect
             ->expects($this->once())
             ->method('offset')
-            ->with($this->equalTo(0))
+            ->with(static::equalTo(0))
             ->willReturnSelf();
 
-        $this->assertIsArray($this->dbSelect->getItems(0, 10));
+        static::assertIsArray($this->dbSelect->getItems(0, 10));
     }
 
-    public function testGetArrayCopyShouldContainSelectItems(): void
+    public function setUp(): void
     {
-        $this->dbSelect = new Select(
-            $this->mockSelect,
-            $this->mockSql,
-            null,
-            $this->mockSelectCount
-        );
-        $this->assertSame(
-            [
-                'select',
-                'count_select',
-            ],
-            array_keys($this->dbSelect->getArrayCopy())
-        );
+        $this->mockResult    = $this->createMock(ResultInterface::class);
+        $this->mockStatement = $this->createMock(StatementInterface::class);
+
+        $this->mockStatement->expects($this->any())->method('execute')->willReturn($this->mockResult);
+
+        $this->mockSql = $this->createMockSql($this->mockStatement);
+
+        $this->mockSelect      = $this->createMock(Sql\Select::class);
+        $this->mockSelectCount = $this->createMock(Sql\Select::class);
+        $this->dbSelect        = new Select($this->mockSelect, $this->mockSql);
     }
 
     private function createMockSql(StatementInterface&MockObject $statement): Sql\Sql&MockObject
@@ -227,16 +238,16 @@ final class DbSelectTest extends TestCase
         $mockPlatform->expects($this->any())->method('getName')->willReturn('platform');
 
         $mockSql = $this->getMockBuilder(Sql\Sql::class)
-                        ->setConstructorArgs(
-                            [
-                                $this->getMockBuilder(Adapter::class)
-                                     ->setConstructorArgs([$mockDriver, $mockPlatform])
-                                     ->getMock(),
-                            ]
-                        )->getMock();
+            ->setConstructorArgs(
+                [
+                    $this->getMockBuilder(Adapter::class)
+                        ->setConstructorArgs([$mockDriver, $mockPlatform])
+                        ->getMock(),
+                ],
+            )
+            ->getMock();
 
-        $mockSql
-            ->expects($this->any())
+        $mockSql->expects($this->any())
             ->method('prepareStatementForSqlObject')
             ->with($this->isInstanceOf(Sql\Select::class))
             ->willReturn($statement);
