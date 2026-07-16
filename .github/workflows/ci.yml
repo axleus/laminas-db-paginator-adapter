@@ -38,11 +38,6 @@ jobs:
         if: matrix.dependencies == 'latest'
         run: composer update --no-interaction --no-progress
 
-      # Set the Mago PHP version via env var so it overrides mago.toml
-      # for each matrix PHP version without mutating the config file.
-      - name: Pin Mago PHP version
-        run: echo "MAGO_PHP_VERSION=${{ matrix.php }}" >> "$GITHUB_ENV"
-
       - name: Check formatting
         run: mago format --check
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PhpDb\Paginator\Adapter;
 
 use Laminas\Paginator\Adapter\AdapterInterface;
+use Override;
 use PhpDb\Adapter\AdapterInterface as DbAdapterInterface;
 use PhpDb\Paginator\Adapter\Exception\MissingRowCountColumnException;
 use PhpDb\Paginator\Adapter\Exception\UnexpectedValueException;
@@ -71,6 +72,7 @@ class Select implements AdapterInterface
      *
      * @throws UnexpectedValueException
      */
+    #[Override]
     public function count(): int
     {
         $select    = $this->getSelectCount();
@@ -98,6 +100,7 @@ class Select implements AdapterInterface
      * @inheritDoc
      * @throws UnexpectedValueException
      */
+    #[Override]
     public function getItems(int $offset, int $itemCountPerPage): array
     {
         $select = clone $this->select;
