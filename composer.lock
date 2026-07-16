@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c303109de8390664120bc844b9054e0d",
+    "content-hash": "ef85944cbe1ae8572a6ec006f5dc5989",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -672,6 +672,65 @@
                 "source": "https://github.com/phar-io/version/tree/3.2.1"
             },
             "time": "2022-02-21T01:04:05+00:00"
+        },
+        {
+            "name": "php-db/phpdb-sqlite",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-db/phpdb-sqlite.git",
+                "reference": "273c68cfa5b770c5a86b3e1f1f37d7058ed13582"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-db/phpdb-sqlite/zipball/273c68cfa5b770c5a86b3e1f1f37d7058ed13582",
+                "reference": "273c68cfa5b770c5a86b3e1f1f37d7058ed13582",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "php-db/phpdb": "^0.6.0",
+                "webmozart/assert": "^2.0"
+            },
+            "require-dev": {
+                "ext-pdo": "*",
+                "ext-pdo_sqlite": "*",
+                "laminas/laminas-coding-standard": "^3.0.1",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpunit/phpunit": "^11.5.42"
+            },
+            "suggest": {
+                "laminas/laminas-servicemanager": "Laminas\\ServiceManager component"
+            },
+            "type": "library",
+            "extra": {
+                "laminas": {
+                    "config-provider": "PhpDb\\Sqlite\\ConfigProvider"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpDb\\Sqlite\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "SQLite support for php-db",
+            "homepage": "https://github.com/php-db/phpdb-sqlite/discussions",
+            "keywords": [
+                "db",
+                "php-db",
+                "sqlite"
+            ],
+            "support": {
+                "forum": "https://github.com/php-db/phpdb-sqlite/discussions",
+                "issues": "https://github.com/php-db/phpdb-sqlite/issues",
+                "source": "https://github.com/php-db/phpdb-sqlite"
+            },
+            "time": "2026-05-20T06:44:55+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -2201,6 +2260,72 @@
                 }
             ],
             "time": "2025-11-17T20:03:58+00:00"
+        },
+        {
+            "name": "webmozart/assert",
+            "version": "2.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/webmozarts/assert.git",
+                "reference": "2ccb7c2e821038c03a3e6e1700c570c158c55f70"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/webmozarts/assert/zipball/2ccb7c2e821038c03a3e6e1700c570c158c55f70",
+                "reference": "2ccb7c2e821038c03a3e6e1700c570c158c55f70",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-date": "*",
+                "ext-filter": "*",
+                "php": "^8.2"
+            },
+            "suggest": {
+                "ext-intl": "",
+                "ext-simplexml": "",
+                "ext-spl": ""
+            },
+            "type": "library",
+            "extra": {
+                "psalm": {
+                    "pluginClass": "Webmozart\\Assert\\PsalmPlugin"
+                },
+                "branch-alias": {
+                    "dev-master": "2.0-dev",
+                    "dev-feature/2-0": "2.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Webmozart\\Assert\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bernhard Schussek",
+                    "email": "bschussek@gmail.com"
+                },
+                {
+                    "name": "Woody Gilk",
+                    "email": "woody.gilk@gmail.com"
+                }
+            ],
+            "description": "Assertions to validate method input/output with nice error messages.",
+            "keywords": [
+                "assert",
+                "check",
+                "validate"
+            ],
+            "support": {
+                "issues": "https://github.com/webmozarts/assert/issues",
+                "source": "https://github.com/webmozarts/assert/tree/2.4.1"
+            },
+            "time": "2026-06-15T15:31:57+00:00"
         }
     ],
     "aliases": [],

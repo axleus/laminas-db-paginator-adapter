@@ -29,6 +29,7 @@
         "php-db/phpdb": "^0.6.0"
     },
     "require-dev": {
+        "php-db/phpdb-sqlite": "^0.2.0",
         "phpunit/phpunit": "^11.5.0"
     },
     "suggest": {
