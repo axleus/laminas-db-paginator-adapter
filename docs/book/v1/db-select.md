@@ -1,6 +1,6 @@
 # The Select adapter
 
-The `Select` adapter allows you to provide a `Select` statement for pulling a dataset, and optionally a `Select` statement for pulling a count of results, and an optional `Select` statement for providing an overall count of items.
+The `Select` adapter allows you to provide a `Select` statement for pulling a dataset, optionally a result set prototype for shaping the items returned, and an optional `Select` statement for providing an overall count of items.
 
 The adapter does **not** fetch all records from the database in order to count them, nor does it run any queries immediately.
 If no `Select` instance was provided for counting results, the adapter manipulates the original `Select` to produce a corresponding `COUNT` query, and uses the new query to get the number of rows.
@@ -12,17 +12,17 @@ The `Select` constructor has the following signature:
 
 ```php
 public function __construct(
-    \Laminas\Db\Sql\Select $select,
-    \Laminas\Db\Adapter\AdapterInterface|\Laminas\Db\Sql\Sql $adapterOrSqlObject,
-    ?\Laminas\Db\ResultSet\ResultSetInterface $resultSetPrototype = null,
-    ?\Laminas\Db\Sql\Select $countSelect = null
+    \PhpDb\Sql\Select $select,
+    \PhpDb\Adapter\AdapterInterface|\PhpDb\Sql\Sql $adapterOrSqlObject,
+    ?\PhpDb\ResultSet\ResultSetInterface $resultSetPrototype = null,
+    ?\PhpDb\Sql\Select $countSelect = null
 )
 ```
 
 The first argument is the `Select` to use when retrieving results to paginate.
 The next argument, `$adapterOrSqlObject`, provides access to the adapter so it can execute the `Select` statement against the actual database.
 The third argument is a specific result set type to use on results returned from the `Select` operation; these allow you to customize the items returned, if desired.
-(See the [laminas-db ResultSet documentation for more details](https://docs.laminas.dev/laminas-db/result-set/).)
+(See the [phpdb ResultSet documentation for more details](https://github.com/php-db/phpdb/).)
 The fourth argument allows you to specify a specific `Select` instance to use to provide a total count of results.
 
 ### Using the AdapterPluginManager
@@ -32,13 +32,13 @@ You can retrieve an instance from the plugin manager via its `get()` method, pas
 
 ```php
 use Laminas\Paginator\AdapterPluginManager;
-use Laminas\Db\Paginator\Adapter\Select;
+use PhpDb\Paginator\Adapter\Select;
 
 // $container is the PSR-11 container associated with the application.
 $pluginManager = $container->get(AdapterPluginManager::class);
 
-// $select is the laminas-db Select instance for retrieving items
-// $dbAdapter is the laminas-db adapter you want to use
+// $select is the phpdb Select instance for retrieving items
+// $dbAdapter is the phpdb adapter you want to use
 $adapter = $pluginManager->get(Select::class, [
     $select,
     $dbAdapter
@@ -49,16 +49,16 @@ All required arguments to the constructor must be passed in the array, and they 
 
 ## Modifying Result Items
 
-The default `Laminas\Db\ResultSet\ResultSet` used when iterating over items returns each item as an associative array.
-If you wish to filter out specific fields, modify the column names, or return something other than an associative array, you will need to provide a different `Laminas\Db\ResultSet\ResultSetInterface` implementation to the constructor, or extend the adapter and override the `getItems()` method.
+The default `PhpDb\ResultSet\ResultSet` used when iterating over items returns each item as an associative array.
+If you wish to filter out specific fields, modify the column names, or return something other than an associative array, you will need to provide a different `PhpDb\ResultSet\ResultSetInterface` implementation to the constructor, or extend the adapter and override the `getItems()` method.
 
 ### Providing an Alternate ResultSet
 
-You can override the default `ResultSet` implementation by passing an object implementing `Laminas\Db\ResultSet\ResultSetInterface` as the third constructor argument to the `Select` adapter:
+You can override the default `ResultSet` implementation by passing an object implementing `PhpDb\ResultSet\ResultSetInterface` as the third constructor argument to the `Select` adapter:
 
 ```php
-use Laminas\Db\ResultSet\HydratingResultSet;
-use Laminas\Db\Paginator\Adapter\Select;
+use PhpDb\ResultSet\HydratingResultSet;
+use PhpDb\Paginator\Adapter\Select;
 use Laminas\Paginator\Paginator;
 
 // $objectPrototype is an instance of our custom entity
@@ -67,9 +67,9 @@ use Laminas\Paginator\Paginator;
 $resultSet = new HydratingResultSet($hydrator, $objectPrototype);
 
 // $query is our Select statement
-// $dbAdapter is the laminas-db adapter instance
-$adapter   = new Select($query, $dbAdapter, $resultSet)
-$paginator = new Laminas\Paginator\Paginator($adapter);
+// $dbAdapter is the phpdb adapter instance
+$adapter   = new Select($query, $dbAdapter, $resultSet);
+$paginator = new Paginator($adapter);
 ```
 
 Now when we iterate over `$paginator`, we will get instances of our custom entity instead of associative arrays.
@@ -83,16 +83,14 @@ It assumes the class `App\Fuzz` exists, and defines a static method `fromArray()
 ```php
 namespace App;
 
-use Laminas\Db\Paginator\Adapter\Select;
+use PhpDb\Paginator\Adapter\Select;
 
 class FuzzSelect extends Select
 {
-    public function getItems($offset, $itemCountPerPage)
+    public function getItems(int $offset, int $itemCountPerPage): array
     {
         return array_map(
-            function (array $row): Fuzz {
-              return Fuzz::fromArray($row);
-            },
+            fn (array $row): Fuzz => Fuzz::fromArray($row),
             parent::getItems($offset, $itemCountPerPage)
         );
     }
@@ -108,28 +106,55 @@ There are two approaches for doing this: providing an additional `Select` instan
 
 ### Providing a Select for Counting
 
-You can pass an additional `Laminas\Db\Sql\Select` object as the fourth constructor argument to the `Select` adapter to implement a custom count query.
+You can pass an additional `PhpDb\Sql\Select` object as the fourth constructor argument to the `Select` adapter to implement a custom count query.
+
+The count query must alias its count column to `Select::ROW_COUNT_COLUMN_NAME` so the adapter can locate the value in the result row.
 
 For example, if you keep track of the count of blog posts in a separate table, you could achieve a faster count query with the following setup:
 
 ```php
-use Laminas\Db\Sql\Select;
-use Laminas\Db\Paginator\Adapter\Select;
+use PhpDb\Sql\Select as SqlSelect;
+use PhpDb\Paginator\Adapter\Select;
 use Laminas\Paginator\Paginator;
 
-$countQuery = new Select();
+$countQuery = new SqlSelect();
 $countQuery
     ->from('item_counts')
     ->columns([Select::ROW_COUNT_COLUMN_NAME => 'post_count']);
 
 // $query is the Select for retrieving items
-// $dbAdapter is the laminas-db adapter
+// $dbAdapter is the phpdb adapter
 $adapter   = new Select($query, $dbAdapter, null, $countQuery);
 $paginator = new Paginator($adapter);
 ```
 
 This approach will probably not give you a huge performance gain on small collections and/or simple select queries.
 However, with complex queries and large collections, a similar approach could give you a significant performance boost.
+
+## Caching Results
+
+In laminas-paginator v2, `Laminas\Paginator\Paginator` provided its own caching layer and inspected the adapter to build a cache key.
+In v3 that mechanism was removed in favour of `Laminas\Paginator\Adapter\CachingAdapter`, a [PSR-6](https://www.php-fig.org/psr/psr-6/) decorator that wraps any adapter, so the `Select` adapter needs no caching support of its own.
+
+Each page of items is cached under a key built from your prefix plus the offset and item count.
+Because the adapter no longer contributes the SQL to the cache key, the prefix you supply must uniquely identify the query being paginated.
+
+```php
+use DateInterval;
+use Laminas\Paginator\Adapter\CachingAdapter;
+use Laminas\Paginator\Paginator;
+use PhpDb\Paginator\Adapter\Select;
+
+// $query is the Select for retrieving items
+// $dbAdapter is the phpdb adapter
+// $cache is any PSR-6 Psr\Cache\CacheItemPoolInterface implementation
+$adapter   = new Select($query, $dbAdapter);
+$paginator = new Paginator(
+    new CachingAdapter($adapter, 'blog-posts', $cache, new DateInterval('PT5M'))
+);
+```
+
+Pass `null` as the final argument to cache items without an expiry.
 
 ### Overriding the Count Method
 
@@ -138,32 +163,33 @@ The following example demonstrates extending the `Select` adapter to override th
 ```php
 namespace App;
 
-use Laminas\Db\Sql\Select;
-use Laminas\Db\Paginator\Adapter\Select;
+use PhpDb\Sql\Select as SqlSelect;
+use PhpDb\Paginator\Adapter\Select;
 
 class MySelect extends Select
 {
-    public function count()
+    public function count(): int
     {
         if ($this->rowCount) {
             return $this->rowCount;
         }
 
-        $select = new Select();
+        $select = new SqlSelect();
         $select
             ->from('item_counts')
-            ->columns(['c'=>'post_count']);
+            ->columns(['c' => 'post_count']);
 
         $statement = $this->sql->prepareStatementForSqlObject($select);
         $result    = $statement->execute();
         $row       = $result->current();
-        $this->rowCount = $row['c'];
+
+        $this->rowCount = (int) $row['c'];
 
         return $this->rowCount;
     }
 }
 
 // $query is the Select for retrieving items
-// $dbAdapter is the laminas-db adapter
+// $dbAdapter is the phpdb adapter
 $adapter = new MySelect($query, $dbAdapter);
 ```

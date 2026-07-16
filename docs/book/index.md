@@ -17,4 +17,6 @@ $ composer require phpdb/phpdb-paginator-adapter
 
 ## Documentation
 
-Documentation is available in the [docs/book/v1](docs/book/v1) folder.
+- [Introduction](v1/intro.md)
+- [Select Adapter](v1/db-select.md)
+- [TableGateway Adapter](v1/db-table-gateway.md)

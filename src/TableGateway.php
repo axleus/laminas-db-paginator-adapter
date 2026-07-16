@@ -2,46 +2,46 @@
 
 declare(strict_types=1);
 
-namespace Laminas\Db\Paginator\Adapter;
+namespace PhpDb\Paginator\Adapter;
 
 use Closure;
-use Laminas\Db\Sql\Having;
-use Laminas\Db\Sql\Where;
-use Laminas\Db\TableGateway\AbstractTableGateway;
+use PhpDb\Sql\Having;
+use PhpDb\Sql\Where;
+use PhpDb\TableGateway\AbstractTableGateway;
 
-/**
- * @template-covariant TKey of int
- * @template-covariant TValue
- * @extends Select<TKey, TValue>
- */
-class TableGateway extends Select
+final class TableGateway extends Select
 {
     /**
      * Constructs instance.
+     *
+     * @param Where|array<array-key, mixed>|Closure|string|null  $where
+     * @param array<array-key, mixed>|string|null                $order
+     * @param array<array-key, mixed>|string|null                $group
+     * @param Having|array<array-key, mixed>|Closure|string|null $having
      */
     public function __construct(
         AbstractTableGateway $tableGateway,
         Where|array|Closure|string|null $where = null,
         array|string|null $order = null,
         array|string|null $group = null,
-        Having|array|Closure|string|null $having = null
+        Having|array|Closure|string|null $having = null,
     ) {
         $this->sql    = $tableGateway->getSql();
         $this->select = $this->sql->select();
 
-        if ($where !== null) {
+        if (null !== $where) {
             $this->select->where($where);
         }
 
-        if ($order !== null) {
+        if (null !== $order) {
             $this->select->order($order);
         }
 
-        if ($group !== null) {
+        if (null !== $group) {
             $this->select->group($group);
         }
 
-        if ($having !== null) {
+        if (null !== $having) {
             $this->select->having($having);
         }
 
@@ -52,7 +52,7 @@ class TableGateway extends Select
             $this->select,
             $tableGateway->getAdapter(),
             $this->resultSetPrototype,
-            $this->countSelect
+            $this->countSelect,
         );
     }
 }

@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Laminas\Db\Paginator\Adapter\Exception;
+namespace PhpDb\Paginator\Adapter\Exception;
 
 use Throwable;
 
-interface ExceptionInterface extends Throwable
-{
-}
+/**
+ * @api
+ */
+interface ExceptionInterface extends Throwable {}

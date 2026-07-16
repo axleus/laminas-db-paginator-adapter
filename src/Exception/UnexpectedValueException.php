@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Laminas\Db\Paginator\Adapter\Exception;
+namespace PhpDb\Paginator\Adapter\Exception;
 
-class UnexpectedValueException extends \UnexpectedValueException implements
-    ExceptionInterface
-{
-}
+use UnexpectedValueException as SplUnexpectedValueException;
+
+final class UnexpectedValueException extends SplUnexpectedValueException implements ExceptionInterface {}

@@ -2,24 +2,35 @@
 
 declare(strict_types=1);
 
-namespace Laminas\Db\Paginator\Adapter;
+namespace PhpDb\Paginator\Adapter;
 
-use Laminas\Db\Paginator\Adapter\Exception\InvalidArgumentException;
-use Laminas\Db\Paginator\Adapter\Exception\UnexpectedValueException;
+use PhpDb\Adapter\AdapterInterface as DbAdapterInterface;
+use PhpDb\Paginator\Adapter\Exception\InvalidArgumentException;
+use PhpDb\ResultSet\ResultSetInterface;
+use PhpDb\Sql;
 use Psr\Container\ContainerInterface;
-use ReflectionException;
 
-class SelectFactory extends AbstractAdapterFactory
+final class SelectFactory
 {
     /**
-     * @param class-string       $requestedName
-     * @param array|null         $options
+     * @param class-string $requestedName
+     * @param array|null $options
+     * @psalm-param array{
+     *     0: Sql\Select,
+     *     1: Sql\Sql|DbAdapterInterface,
+     *     2?: ResultSetInterface|null,
+     *     3?: Sql\Select|null,
+     * }|null $options
      * @throws InvalidArgumentException
-     * @throws UnexpectedValueException
-     * @throws ReflectionException
+     *
+     * @mago-expect analysis:unused-parameter
      */
     public function __invoke(ContainerInterface $container, string $requestedName, ?array $options = null): Select
     {
-        return $this->buildAdapter(Select::class, $requestedName, $options);
+        if (null === $options) {
+            throw new InvalidArgumentException('Missing options');
+        }
+
+        return new Select(...$options);
     }
 }

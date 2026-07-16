@@ -2,31 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Laminas\Db\Paginator\Adapter;
+namespace PhpDb\Paginator\Adapter;
 
-class Module
+final class Module
 {
     /**
-     * Return default laminas-db-paginator-adapter configuration.
+     * Return default phpdb-paginator-adapter configuration.
      *
      * @return array[]
      */
     public function getConfig(): array
     {
+        $provider = new ConfigProvider();
+
         return [
-            'paginators' => [
-                'aliases'   => [
-                    'select'       => Select::class,
-                    'Select'       => Select::class,
-                    'tablegateway' => TableGateway::class,
-                    'tableGateway' => TableGateway::class,
-                    'TableGateway' => TableGateway::class,
-                ],
-                'factories' => [
-                    Select::class       => SelectFactory::class,
-                    TableGateway::class => TableGatewayFactory::class,
-                ],
-            ],
+            'paginators' => $provider->getPaginatorConfig(),
         ];
     }
 }

@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Laminas\Db\Paginator\Adapter\Exception;
+namespace PhpDb\Paginator\Adapter\Exception;
 
-class InvalidArgumentException extends \InvalidArgumentException implements
-    ExceptionInterface
-{
-}
+use InvalidArgumentException as SplInvalidArgumentException;
+
+final class InvalidArgumentException extends SplInvalidArgumentException implements ExceptionInterface {}
